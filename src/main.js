@@ -413,7 +413,7 @@ app.post('/sales/insert-spacific-data', async (req, res) => {
 /**
  * 8. Create an API endpoint to delete the product 'Eggs'. (0.5 Grade)
  */
-// app.delete('/products/delete-eggs', async (req, res) => {
+// app.delete('/products/delete-eggs', async (req, res) => { ✅ checked
 //     try {
 //         const { rows } = await pool.query(
 //             `DELETE FROM products WHERE name='Eggs' RETURNING id`
