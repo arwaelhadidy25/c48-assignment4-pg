@@ -1,0 +1,4 @@
+CREATE USER store_manager WITH PASSWORD '1234';
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO store_manager;
+REVOKE UPDATE ON ALL TABLES IN SCHEMA public FROM store_manager;
+GRANT DELETE ON sales TO store_manager;

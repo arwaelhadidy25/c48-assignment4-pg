@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/migrations/product.sql" value="17b816d1-6254-4a87-9763-72b187fbc24d" />
+    <file url="file://$PROJECT_DIR$/migrations/sales.sql" value="17b816d1-6254-4a87-9763-72b187fbc24d" />
+    <file url="file://$PROJECT_DIR$/migrations/store-manager.sql" value="17b816d1-6254-4a87-9763-72b187fbc24d" />
+    <file url="file://$PROJECT_DIR$/migrations/supplier.sql" value="17b816d1-6254-4a87-9763-72b187fbc24d" />
+  </component>
+</project>
