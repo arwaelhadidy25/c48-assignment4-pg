@@ -365,7 +365,7 @@ app.post('/suppliers/change-contact-number', async (req, res) => {
  *   }
  * }
  */
-//with this body
+//with above body
 app.post('/sales/insert-spacific-data', async (req, res) => {
     const client = await pool.connect();
 
@@ -379,7 +379,7 @@ app.post('/sales/insert-spacific-data', async (req, res) => {
         const { rows: supplierRows } = await client.query(
             `INSERT INTO suppliers(supplier_name, contact_number) VALUES ($1, $2) RETURNING id`,
             [
-                supplier.supplier_name,
+                supplier.name,
                 supplier.contact_number
             ]
         );
@@ -395,15 +395,15 @@ app.post('/sales/insert-spacific-data', async (req, res) => {
                     ($9, $10, $11, $12)
                  RETURNING id, supplier_id, name`,
             [
-                products[0].name, products[0].price, products[0].stock, supplierId,
-                products[1].name, products[1].price, products[1].stock, supplierId,
-                products[2].name, products[2].price, products[2].stock, supplierId
+                products[0].name, products[0].price, products[0].stock_quantity, supplierId,
+                products[1].name, products[1].price, products[1].stock_quantity, supplierId,
+                products[2].name, products[2].price, products[2].stock_quantity, supplierId
             ]
         );
 
         // 3. Get the product sold
         const productToSell = productRows.find(
-            product => product.id === sale.product_name
+            product => product.name === sale.product_name
         );
 
         if (!productToSell) {
@@ -417,7 +417,7 @@ app.post('/sales/insert-spacific-data', async (req, res) => {
              VALUES ($1, $2, $3)`,
             [
                 productToSell.id,
-                sale.quantity_sold,
+                sale.quantity,
                 sale.sale_date
             ]
         );
@@ -426,20 +426,14 @@ app.post('/sales/insert-spacific-data', async (req, res) => {
         // Everything succeeded
         await client.query('COMMIT');
 
-        res.status(200).json({
-            status: 'OK',
-            message: 'insert data successfully'
-        });
+        res.status(200).json({status: 'OK', message: 'insert data successfully'});
 
     } catch (err) {
 
         // Something failed
         await client.query('ROLLBACK');
 
-        res.status(500).json({
-            status: 'error',
-            message: err.message
-        });
+        res.status(500).json({status: 'error', message: err.message});
 
     } finally {
 
