@@ -147,9 +147,11 @@
 - insert specific seed data (FreshFoods supplier + Milk/Bread/Eggs + one sale)
 - url: /sales/insert-spacific-data
 - method: POST
-- request-body: none
+- request-body: {"supplier": {"supplier_name": "FreshFoods","contact_number": "01001234567"},
+  "products": [{"name": "Milk","price": 15,"stock": 50 }, {"name": "Bread","price": 10,"stock": 30 }, {"name": "Eggs","price": 20,"stock": 40 }],
+  "sale": {"product_name": "Milk","quantity_sold": 2,"sale_date": "2025-05-20" } }
 - response-body: { 'status': 'OK', 'message': 'insert data successfully' }
-- response-body[fail, 500]: { 'status': 'error', 'message': err.message }
+- response-body: { 'status': 'error', 'message': err.message }
 
 ---
 

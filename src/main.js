@@ -335,62 +335,118 @@ app.post('/suppliers/change-contact-number', async (req, res) => {
  * c. Add a record for the sale of 2 units of 'Milk' made on '2025-05-20'.
  */
 //✅ done
+/**
+ * {
+ *   "supplier": {
+ *     "supplier_name": "FreshFoods",
+ *     "contact_number": "01001234567"
+ *   },
+ *   "products": [
+ *     {
+ *       "name": "Milk",
+ *       "price": 15,
+ *       "stock": 50
+ *     },
+ *     {
+ *       "name": "Bread",
+ *       "price": 10,
+ *       "stock": 30
+ *     },
+ *     {
+ *       "name": "Eggs",
+ *       "price": 20,
+ *       "stock": 40
+ *     }
+ *   ],
+ *   "sale": {
+ *     "product_name": "Milk",
+ *     "quantity_sold": 2,
+ *     "sale_date": "2025-05-20"
+ *   }
+ * }
+ */
+//with this body
 app.post('/sales/insert-spacific-data', async (req, res) => {
     const client = await pool.connect();
 
     try {
         await client.query('BEGIN');
 
-        //Add supplier
-        const {rows:supplierRows}=await client.query(
-            `INSERT INTO suppliers(supplier_name, contact_number)
-            VALUES ($1, $2) RETURNING id`,['FreshFoods', '01001234567']
-        );
-        const supplierId = supplierRows[0].id;
-        // 2. Add products
-        const { rows: productRows } = await client.query(
-            `INSERT INTO products (name, price, stock, supplier_id)
-             VALUES($1, $2, $3, $4),
-                   ($5, $6, $7, $8),
-                   ($9, $10, $11, $12)
-             RETURNING id,supplier_id,name`,
+        // Get data from body
+        const { supplier, products, sale } = req.body;
+
+        // 1. Add supplier
+        const { rows: supplierRows } = await client.query(
+            `INSERT INTO suppliers(supplier_name, contact_number) VALUES ($1, $2) RETURNING id`,
             [
-                'Milk', 15.00, 50,supplierId,
-                'Bread', 10.00, 30,supplierId,
-                'Eggs', 20.00, 40,supplierId
+                supplier.supplier_name,
+                supplier.contact_number
             ]
         );
 
-        // 3. Get Milk
-        const milk = productRows.find(
-            product => product.name === 'Milk'
+        const supplierId = supplierRows[0].id;
+
+
+        // 2. Add products
+        const { rows: productRows } = await client.query(
+            `INSERT INTO products (name, price, stock, supplier_id)
+             VALUES ($1, $2, $3, $4),
+                    ($5, $6, $7, $8),
+                    ($9, $10, $11, $12)
+                 RETURNING id, supplier_id, name`,
+            [
+                products[0].name, products[0].price, products[0].stock, supplierId,
+                products[1].name, products[1].price, products[1].stock, supplierId,
+                products[2].name, products[2].price, products[2].stock, supplierId
+            ]
         );
+
+        // 3. Get the product sold
+        const productToSell = productRows.find(
+            product => product.id === sale.product_name
+        );
+
+        if (!productToSell) {
+            throw new Error('Product not found');
+        }
 
 
         // 4. Add sale
         await client.query(
             `INSERT INTO sales (product_id, quantity_sold, sale_date)
-             VALUES ($1, $2, $3)`, [milk.id, 2, '2025-05-20']
+             VALUES ($1, $2, $3)`,
+            [
+                productToSell.id,
+                sale.quantity_sold,
+                sale.sale_date
+            ]
         );
 
 
         // Everything succeeded
         await client.query('COMMIT');
-        res.status(200).json({status: 'OK', message: 'insert data successfully'});
+
+        res.status(200).json({
+            status: 'OK',
+            message: 'insert data successfully'
+        });
 
     } catch (err) {
 
         // Something failed
         await client.query('ROLLBACK');
-        res.status(500).json({status: 'error', message: err.message});
+
+        res.status(500).json({
+            status: 'error',
+            message: err.message
+        });
 
     } finally {
 
         client.release();
 
-
     }
-})
+});
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 /**
